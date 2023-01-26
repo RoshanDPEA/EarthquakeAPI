@@ -17,6 +17,7 @@ import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import Audio, display
+import matplotlib.pyplot as plt
 
 import ruptures as rpt  # our package
 
@@ -29,7 +30,7 @@ duration = 30  # in seconds
 
 
 #change to the .wav file you want to use for this
-signal, sampling_rate = librosa.load("ChileEarthquakelonger.wav", duration=duration)
+signal, sampling_rate = librosa.load("Chile2010Equake.wav", duration=duration)
 
 
 
@@ -100,3 +101,18 @@ for (segment_number, (start, end)) in enumerate(
     print(f"Segment n°{segment_number} (duration: {segment.size/sampling_rate:.2f} s)")
     display(Audio(data=segment, rate=sampling_rate))
 
+y, sr = signal, sampling_rate
+onset_env = librosa.onset.onset_strength(y=y, sr=sr)
+
+# Or a dynamic tempo
+dtempo = librosa.beat.tempo(onset_envelope=onset_env, sr=sr,
+                            aggregate=None)
+
+fig, ax = plt.subplots()
+tg = librosa.feature.tempogram(onset_envelope=onset_env, sr=sr,
+                               hop_length=hop_length_tempo)
+librosa.display.specshow(tg, x_axis='time', y_axis='tempo', cmap='magma', ax=ax)
+ax.plot(librosa.times_like(dtempo), dtempo,
+         color='c', linewidth=1.5, label='Tempo estimate (default prior)')
+
+plt.show()
